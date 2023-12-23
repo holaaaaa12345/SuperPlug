@@ -3,7 +3,11 @@ Meet SuperPlug AutoML – your easygoing sidekick for Python machine learning. F
 
 P.S. Developed by me, ChatGPT, Claude, and Bard (in order of contributions decreasingly). Backend is fully inspired by Scikit-Learn, effectively a distilled version of it. 
 
+### The main page
 ![alt text](main_page.PNG)
+
+### The result page
+![alt text](result_page.PNG)
 
 ### The pipeline for each column features
 ```mermaid
