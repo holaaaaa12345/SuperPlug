@@ -1,5 +1,7 @@
 # Overview
-Introducing SuperPlug AutoML, your straightforward solution for hassle-free supervised machine learning in Python. This plug-and-play gem requires only NumPy, eliminating unnecessary dependencies and complexities. Welcome to the simplicity of SuperPlug AutoML—where building accurate models has never been easier.
+Meet SuperPlug AutoML – your easygoing sidekick for Python machine learning. Forget efficiency; we're all about that NumPy life and taking the scenic route in supervised learning. Get ready for a laugh as SuperPlug AutoML turns model creation into a comedy show – because who said machine learning couldn't be entertainingly inefficient?
+
+P.S. Developed by me, ChatGPT, Claude, and Bard (in order of contributions decreasingly). Backend is fully inspired by Scikit-Learn, effectively a distilled version of it. 
 
 ![alt text](main_page.PNG)
 
