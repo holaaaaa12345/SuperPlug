@@ -3,17 +3,16 @@ from metrics import *
 
 """This is my custom and purely python backend for the SuperPlug. 
 The OOP structure resembles that of Sklearn. In fact, I try to 
-mimick Sklearn but without all the fancy code and exception handling."""
+mimick Sklearn but without all the fancy code and exception handling.
+Most comments and docs are written by chatgpt"""
 
 class BaseEstimator:
     """
-    Base class for all estimators in scikit-learn-like frameworks.
+    Base class for all estimators.
 
     Methods:
         - set_params(**params): Set parameters on the estimator.
 
-    Note:
-        All scikit-learn estimators should inherit from this class.
     """
 
     def set_params(self, **params):
@@ -30,16 +29,22 @@ class BaseEstimator:
             setattr(self, key, value)
         return self
 
+    def get_params(self):
+        """Get parameters for the estimator."""
+        params = {}
+        for key in self.__dict__:
+            if not (key.startswith("_") or key.startswith("__") or key.endswith("_")):
+                value = getattr(self, key)
+                params[key] = value
+        return params
 
 class TransformerMixin:
     """
-    Mixin class for transformers in scikit-learn-like frameworks.
+    Mixin class for transformers.
 
     Methods:
         - fit_transform(X, **fit_params): Fit the transformer on the input data and transform it.
 
-    Note:
-        All scikit-learn transformers should inherit from this class.
     """
 
     def fit_transform(self, X, **fit_params):
@@ -151,6 +156,8 @@ class RandomizedSearchCV():
         random_search.fit(X_train, y_train)
         print("Best hyperparameters:", random_search.best_params)
         ```
+    TODO:
+        passing metric is still under constrution
     """
 
     def __init__(self, estimator, param_distributions, metric=r2_score, n_iter=20):
@@ -227,7 +234,7 @@ class RandomizedSearchCV():
             
     def fit(self, X, y):
         """
-        Run random search to find the best hyperparameters and fit the model.
+        Run random search to find the best hyperparameters and refit the model.
 
         Parameters:
             - X: The data to fit.
@@ -307,7 +314,7 @@ class Pipeline:
         return Xt
 
 
-class StandardScaler:
+class StandardScaler(TransformerMixin):
     """
     StandardScaler scales input features by removing the mean and scaling to unit variance.
 
@@ -365,7 +372,7 @@ class StandardScaler:
         X_scaled = self.transform(X)
         return X_scaled
 
-class SimpleImputer:
+class SimpleImputer(TransformerMixin):
     """
     Simple imputer for handling missing values in a dataset.
 
@@ -429,7 +436,7 @@ class SimpleImputer:
         return X_imputed
 
 
-class OneHotEncoder:
+class OneHotEncoder(TransformerMixin):
     """
     Simple one-hot encoder for categorical variables.
 
@@ -543,7 +550,7 @@ class LinearModel():
         Returns:
             - Linear combination of features.
         """
-        return X @ self.parameters
+        return X @ self.parameters_
 
 
 class LinearRegression(LinearModel, BaseRegression):
@@ -570,11 +577,11 @@ class LinearRegression(LinearModel, BaseRegression):
         Returns:
             - self: Returns the instance itself.
         """
-        self.n = len(X)
-        X = np.hstack((np.ones((self.n, 1)), X))  # Use np.ones for the column of ones
-        self.parameters = np.linalg.lstsq(X, y, rcond=None)[0]
-        self.coef_ = self.parameters[1:]
-        self.intercept_ = self.parameters[0]
+        n = len(X)
+        X = np.hstack((np.ones((n, 1)), X))  # Use np.ones for the column of ones
+        self.parameters_ = np.linalg.lstsq(X, y, rcond=None)[0]
+        self.coef_ = self.parameters_[1:]
+        self.intercept_ = self.parameters_[0]
         return self
 
     def predict(self, X):
@@ -632,9 +639,9 @@ class Ridge(LinearModel, BaseRegression):
 
         # Closed-form solution
         I = np.eye(n_features)
-        self.parameters = np.linalg.inv(XtX + self.alpha * I) @ Xty
-        self.intercept_ = self.parameters[0]
-        self.coef_ = self.parameters[1:]
+        self.parameters_ = np.linalg.inv(XtX + self.alpha * I) @ Xty
+        self.intercept_ = self.parameters_[0]
+        self.coef_ = self.parameters_[1:]
 
         return self
 
@@ -648,8 +655,10 @@ class Ridge(LinearModel, BaseRegression):
         Returns:
             The predicted target values (NumPy array of shape (n_samples,)).
         """
+
         # Add intercept term
         X = np.hstack((np.ones((X.shape[0], 1)), X))
+        
         prediction = super().lin_combination(X)
 
         return prediction

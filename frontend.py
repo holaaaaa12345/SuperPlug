@@ -2,33 +2,37 @@ import numpy as np
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import csv
-
-from api import Result
 from custom_widget import *
+from api import Result
+
 
 
 COLOR_BACKGROUND = "#3a615c"
 COLOR_FILL_LGT = "#82b0a2"
 COLOR_FILL_MED = "#e4eaf5"
 COLOR_TXT_DARK = "#0c0e12"
-
-FONT_1 = ("Calibri", 15, "bold")
+COLOR_LISTBOX = "#254a3a"
 
 
 class FeatureConfig(tk.Frame):
 
     def __init__(self, parent, *args, **kwargs):
+
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
+        self.init_widget()
+        self.place_widget()
 
-        # Widget initialization (TO DO: needs to be cleaner!)
+    
+    def init_widget(self):
+
         self.entry_path = tk.Entry(self, width=50, bg=COLOR_FILL_MED)
         self.browse_button = ttk.Button(self, text="Browse", 
                                         command=self.browse_file)
 
         self.columns = tk.Listbox(self, selectmode=tk.MULTIPLE, 
                                   height=15, bg=COLOR_FILL_LGT, 
-                                  selectbackground="#254a3a")
+                                  selectbackground=COLOR_LISTBOX)
         self.label_columns = ttk.Label(self, text="Columns")
         self.button_remove = CustomButton(self, self.parent.manager, 
                                           text="<--", state="disabled", 
@@ -36,7 +40,7 @@ class FeatureConfig(tk.Frame):
 
         self.target = tk.Listbox(self, selectmode=tk.MULTIPLE, 
                                  height=1, bg=COLOR_FILL_LGT, 
-                                 selectbackground="#254a3a")
+                                 selectbackground=COLOR_LISTBOX)
         self.label_target = ttk.Label(self, text="Target", 
                                       style="TLabel")
         self.button_target = CustomButton(self, self.parent.manager, 
@@ -45,13 +49,14 @@ class FeatureConfig(tk.Frame):
 
         self.features = tk.Listbox(self, selectmode=tk.MULTIPLE, 
                                    bg=COLOR_FILL_LGT, 
-                                   selectbackground="#254a3a")
+                                   selectbackground=COLOR_LISTBOX)
         self.label_features = ttk.Label(self, text="Features") 
         self.button_features = CustomButton(self, self.parent.manager, 
                                             text="-->", state="disabled",
                                             command=lambda: self.move_selected("features"))
 
-        # Widget placement
+    def place_widget(self):
+
         self.entry_path.grid(row=0, column=0, padx=10, pady=10, 
                              columnspan=3, sticky="W")
         self.browse_button.grid(row=0, column=3, padx=10, 
@@ -172,34 +177,41 @@ class ModelConfig(tk.Frame):
     def start_execute(self):
 
         feature_listbox = self.parent.feature_config.features
-        feature_content = [feature_listbox.get(index) for index in range(feature_listbox.size())]
+        self.feature_content = [feature_listbox.get(index) for index in range(feature_listbox.size())]
         target_listbox = self.parent.feature_config.target
-        target_content = [target_listbox.get(index) for index in range(target_listbox.size())]
+        self.target_content = [target_listbox.get(index) for index in range(target_listbox.size())]
         model_type = self.parent.model_config.model_type.model_type_final
 
         try:
-            self.validate_feature_config(feature_content, target_content)
+            self.validate_feature_config(self.feature_content, 
+                                         self.target_content)
             self.validate_model_config(model_type)
 
             raw_data = self.parent.feature_config.raw_data
 
-            feature_used = [raw_data[i] for i in feature_content]
-            target_used = raw_data[target_content[0]]
-
-            result_window = ResultWindow(self.parent, feature_used, target_used, bg=COLOR_BACKGROUND)
-
+            feature_used = [raw_data[i] for i in self.feature_content]
+            target_used = raw_data[self.target_content[0]]
         except ValueError as e:  # Catch specific exceptions for better error handling
            self.parent.terminal.write(f"config error: {str(e)}")
 
+        try:
+            result_window = ResultWindow(self.parent, feature_used, target_used, bg=COLOR_BACKGROUND)
+        except Exception as e:
+            self.parent.terminal.write(f"execution error: {str(e)}")
+
     def validate_feature_config(self, feature, target):
+
        if len(feature) == 0:
            raise ValueError("no feature chosen")
+
        if len(target) == 0:
            raise ValueError("no target chosen")
+
        if len(target) >= 2:
            raise ValueError("target more than one")
 
     def validate_model_config(self, model_type):
+
        if len(model_type.get()) == 0:
            raise ValueError("no model type chosen")
 
@@ -239,6 +251,8 @@ class ModelType(ttk.LabelFrame):
         self.radio_mod_type_2.grid(padx=10, sticky="NW")
 
 class ResultWindow(tk.Toplevel):
+    """this code section is hideous -__-. TODO: refactor and
+       make it  clearer"""
 
     def __init__(self, parent, feature, target, **kwargs):
 
@@ -248,6 +262,7 @@ class ResultWindow(tk.Toplevel):
         result = Result(feature, target, None)
         self.models = result.get_models()
         model_names = list(self.models.keys())
+        hyperparameters = []
 
         results = []
 
@@ -258,26 +273,51 @@ class ResultWindow(tk.Toplevel):
             self.parent.update_idletasks()
 
             # Running the main calculation
-            results.append(j.fit().evaluate())
+            estimator = j.fit()
+            results.append(estimator.evaluate())
+            hypers = {i:np.round(j, 4) for (i, j) in estimator.get_params().items()}
+            if hypers:
+                hyperparameters.append(hypers)
+            else:
+                hyperparameters.append(None)
 
         parent.terminal.write("======| Execution successful |======")
-        column_list = ["algorithm"] + list(results[0].keys())
+        column_list = ["algorithm"] + ["hyperparameters"] + list(results[0].keys())
         tree = SortableTreeview(self, columns=column_list, show='headings')
-        tree.grid(padx=10, pady=10)
+
 
         # Set the headings
         for col in column_list:
             tree.heading(col, text=col)
             if col=="algorithm":
-                tree.column(col, width=170)  # Adjust the width as needed
+                tree.column(col, width=150)  # Adjust the width as needed
+            elif col=="hyperparameters":
+                tree.column(col, width=150, anchor="center")
             else:
                 tree.column(col, width=100, anchor="center")
 
         # Populate the treeview with data from the list of dictionaries
         for i, data_dict in enumerate(results):
-            tree.insert('', 'end', values=tuple([model_names[i]] + list(data_dict.values())))
-
+            tree.insert('', 'end', 
+                        values=tuple([model_names[i]] + [hyperparameters[i]] + list(data_dict.values())))
         
+        # print(f"feature: {self.parent.model_config.feature_content}")
+        # print(f"target: {self.parent.model_config.target_content}")
+
+        result_label = ttk.Label(self, text="Model Comparison Result")
+        
+        feature_txt = f"feature: {self.parent.model_config.feature_content}"
+        target_txt = f"target: {self.parent.model_config.target_content}"
+
+        config_text = tk.Text(self, width=50, height=2)
+        config_text.insert(tk.INSERT, feature_txt+"\n")
+        config_text.insert(tk.INSERT, target_txt)
+
+
+        tree.grid(padx=10, pady=10, row=2, column=0)
+        config_text.grid(padx=10, pady=3, row=1, column=0, sticky="NSEW")
+        result_label.grid(padx=10, pady=10, row=0, column=0)
+
 class Terminal(tk.Frame):
 
     def __init__(self, parent, **kwargs):

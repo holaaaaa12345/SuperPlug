@@ -1,8 +1,11 @@
 """API to connect to either custom backend or to sklearn. This API
    generates model objects, already equipped with the train and test data,
    that can be fit by the client."""
-USE_SKLEARN = False
 
+
+"""Set this variable to be true if you want to use Sklearn as a backend.
+   The default is False"""
+USE_SKLEARN = False
 if USE_SKLEARN:
 	from sklearn.preprocessing import StandardScaler, OneHotEncoder
 	from sklearn.model_selection import train_test_split
@@ -20,30 +23,28 @@ else:
 import numpy as np
 
 
-
-
-
 class FinalAlgo():
 	
 	def __init__(self, estimator, all_data, **kwargs):
 
-		self.all_data = all_data
+		self._all_data = all_data
 		self.estimator_ = estimator
 
 	def fit(self):
 
-		if hasattr(self.estimator_, "param_space"):
+		if hasattr(self.estimator_, "_param_space"):
 			cv_search = RandomizedSearchCV(estimator=self.estimator_, 
-							 param_distributions=self.estimator_.param_space,
+							 param_distributions=self.estimator_._param_space,
 							 n_iter=10)
-			cv_search.fit(self.all_data["X_train"], self.all_data["y_train"])
+			cv_search.fit(self._all_data["X_train"], self._all_data["y_train"])
 			estimator_final = cv_search.best_estimator_
+			# print(estimator_final.alpha)
 
 		else:
-			estimator_final = self.estimator_.fit(self.all_data["X_train"], self.all_data["y_train"])
+			estimator_final = self.estimator_.fit(self._all_data["X_train"], self._all_data["y_train"])
 
 		# Surely there's a better way to do this -__-
-		setattr(estimator_final, "all_data", self.all_data)
+		setattr(estimator_final, "_all_data", self._all_data)
 		return estimator_final
 
 
@@ -56,7 +57,7 @@ class CustomClassification:
 class CustomRegression:
 
 	def evaluate(self):
-		all_data = self.all_data
+		all_data = self._all_data
 		metrics = {"r2" : r2_score, 
 				   "mse" : mean_squared_error, 
 				   "mad" : mean_absolute_error}
@@ -76,14 +77,14 @@ class LinearRegression(LinearRegression, CustomRegression):
 
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
-		self.all_data = None
+		self._all_data = None
 
 class Ridge(Ridge, CustomRegression):
 
 	def __init__(self, alpha=1, **kwargs):
 		super().__init__(alpha, **kwargs)
-		self.all_data = None
-		self.param_space = {"alpha": np.linspace(0.0001, 1, 100)}
+		self._all_data = None
+		self._param_space = {"alpha": np.linspace(0.0001, 1, 100)}
 
 
 # class Lasso(Lasso, CustomRegression):
