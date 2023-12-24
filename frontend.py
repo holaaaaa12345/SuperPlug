@@ -1,13 +1,18 @@
-import numpy as np
+"""The tkinter frontend part"""
+
+
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+import numpy as np
 import csv
+
 from custom_widget import *
 from api import Result
 
 
-
+# Main colors
 COLOR_BACKGROUND = "#3a615c"
+COLOR_SEC_BACKGROUND = "#014647"
 COLOR_FILL_LGT = "#82b0a2"
 COLOR_FILL_MED = "#e4eaf5"
 COLOR_TXT_DARK = "#0c0e12"
@@ -93,7 +98,7 @@ class FeatureConfig(tk.Frame):
             file_name = file_path.split("/")[-1]
             with open(file_path, "r") as file:
                 reader = csv.reader(file)
-                self.validate_csv(reader, file)
+                self.load_validate_csv(reader, file)
             self.show_columns(self.header)
             self.parent.manager.enable_all()
             self.parent.terminal.write(f"======| {file_name} uploaded successfully |======")
@@ -106,20 +111,15 @@ class FeatureConfig(tk.Frame):
         # else:
         #     self.parent.terminal.write("No CSV chosen.")
 
-    def validate_csv(self, reader, data):
+    def load_validate_csv(self, reader, data):
         try:
             # Load the CSV file using np.genfromtxt
             self.header = ["_".join(i.split()) for i in next(reader)]
-            self.raw_data = np.genfromtxt(data, dtype=None, delimiter=",", names=self.header, 
-                                          encoding=None)
+            self.raw_data = np.genfromtxt(data, dtype=None, delimiter=",", 
+                                          names=self.header, encoding=None)
 
-            # Check for inconsistent column lengths
-            # expected_num_columns = len(data.dtype.names)
-            # actual_num_columns = np.max([len(row) for row in data])
-            # if expected_num_columns != actual_num_columns:
-            #     raise ValueError(f"Error: Inconsistent column lengths. Expected {expected_num_columns} columns, but found {actual_num_columns} columns.")
-
-        except np.lib._iotools.ConversionWarning as e:
+        # TODO: How to do the validation? -__-
+        except Exception as e:
             print(f"Error: {e}")
             return None
 
@@ -259,6 +259,8 @@ class ResultWindow(tk.Toplevel):
         tk.Toplevel.__init__(self, parent, **kwargs)
         self.iconbitmap("SP.ico")
         self.parent = parent
+
+
         result = Result(feature, target, None)
         self.models = result.get_models()
         model_names = list(self.models.keys())
@@ -356,10 +358,10 @@ class MainApplication(tk.Frame):
         style = ttk.Style(self)
         style.configure("TLabel", font=("Calibri", 15, "bold"), 
                         background=COLOR_BACKGROUND, fg=COLOR_TXT_DARK)
-        style.configure("TRadiobutton", background="#014647", foreground="white", font=("Arial", 10))
-        style.configure("TCheckbutton", background="#014647", foreground="white", font=("Arial", 10))
-        style.configure("TLabelframe", background="#014647")
-        style.configure("TLabelframe.Label", background="#014647", foreground="white", font=("Arial", 10))
+        style.configure("TRadiobutton", background=COLOR_SEC_BACKGROUND, foreground="white", font=("Arial", 10))
+        style.configure("TCheckbutton", background=COLOR_SEC_BACKGROUND, foreground="white", font=("Arial", 10))
+        style.configure("TLabelframe", background=COLOR_SEC_BACKGROUND)
+        style.configure("TLabelframe.Label", background=COLOR_SEC_BACKGROUND, foreground="white", font=("Arial", 10))
         style.configure("TButton", font=("calibri", 10, "bold"), width=6)
         style.map("TButton",
                   background=[("active", "#254a3a"), ("disabled", "#888888")],
@@ -373,7 +375,7 @@ class MainApplication(tk.Frame):
         self.manager = WidgetManager()
         self.terminal = Terminal(self, bg=COLOR_BACKGROUND)
         self.feature_config = FeatureConfig(self, bg=COLOR_BACKGROUND)
-        self.model_config = ModelConfig(self, bg="#014647")
+        self.model_config = ModelConfig(self, bg=COLOR_SEC_BACKGROUND)
         
 
         self.feature_config.grid(row=0, column=0)

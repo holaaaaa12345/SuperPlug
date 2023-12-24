@@ -1,27 +1,24 @@
 """API to connect to either custom backend or to sklearn. This API
    generates model objects, already equipped with the train and test data,
-   that can be fit by the client."""
+   that can then be fit by the client."""
 
-
-"""Set this variable to be true if you want to use Sklearn as a backend.
-   The default is False"""
-USE_SKLEARN = False
-if USE_SKLEARN:
-	from sklearn.preprocessing import StandardScaler, OneHotEncoder
-	from sklearn.model_selection import train_test_split
-	from sklearn.linear_model import Lasso, Ridge, LinearRegression
-	from sklearn.impute import SimpleImputer
-	from sklearn.ensemble import RandomForestRegressor
-	from sklearn.base import BaseEstimator, TransformerMixin
-	from sklearn.tree import DecisionTreeRegressor
-	from sklearn.pipeline import Pipeline
-	from sklearn.model_selection import RandomizedSearchCV
-	from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-else:
-	from backend import *
-
+from backend import *
 import numpy as np
 
+"""This API allows for seamless backend switching between custom (from scratch) 
+   and Scikit-Learn. To use Scikit-Learn uncomment the following imports"""
+
+# from sklearn.preprocessing import StandardScaler, OneHotEncoder
+# from sklearn.model_selection import train_test_split
+# from sklearn.linear_model import Lasso, Ridge, LinearRegression
+# from sklearn.impute import SimpleImputer
+# from sklearn.ensemble import RandomForestRegressor
+# from sklearn.base import BaseEstimator, TransformerMixin
+# from sklearn.tree import DecisionTreeRegressor
+# from sklearn.pipeline import Pipeline
+# from sklearn.model_selection import RandomizedSearchCV
+# from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+	
 
 class FinalAlgo():
 	
@@ -43,10 +40,9 @@ class FinalAlgo():
 		else:
 			estimator_final = self.estimator_.fit(self._all_data["X_train"], self._all_data["y_train"])
 
-		# Surely there's a better way to do this -__-
+		# TODO: Surely there's a better way to do this -__-
 		setattr(estimator_final, "_all_data", self._all_data)
 		return estimator_final
-
 
 
 class CustomClassification:
@@ -82,10 +78,12 @@ class LinearRegression(LinearRegression, CustomRegression):
 class Ridge(Ridge, CustomRegression):
 
 	def __init__(self, alpha=1, **kwargs):
-		super().__init__(alpha, **kwargs)
+		super().__init__(alpha=alpha, **kwargs)
 		self._all_data = None
 		self._param_space = {"alpha": np.linspace(0.0001, 1, 100)}
 
+
+# Backend not ready yet :(
 
 # class Lasso(Lasso, CustomRegression):
 
@@ -199,8 +197,6 @@ class Scaler(BaseEstimator, TransformerMixin):
 			X = cat_feature
 		# print(f"final: {X}")
 		return X
-
-
 
 class Result:
 
