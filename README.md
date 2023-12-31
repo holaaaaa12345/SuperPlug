@@ -1,15 +1,24 @@
 # Overview
-Meet SuperPlug AutoML – your lazy-but-trying sidekick for traditional supervised learning. Just throw in your features and target like you're ordering takeout, and it'll give it a go; it might be a decent job, or it might just shrug and say, "¯_(ツ)_/¯."
 
-Who said Python can't do squat without a massive entourage of dependencies? Forget the obsession in complexity and efficiency; we're living the NumPy-only life and taking the scenic route in supervised learning.
+Enter SuperPlug AutoML – your handy and no-code traditional supervised learning companion, meticulously brought to life by the coding prowess of ChatGPT, Claude, Bard, and me. Positioned as a baseline model comparison tool, this collaboration champions simplicity without compromising efficiency (well at least not that much :p). 
+*Currently under development with supports for ridge and linear regression.*
 
-### Technical overview
-Developed by me, ChatGPT, Claude, and Bard (in order of contributions decreasingly) mainly to serve as a baseline comparison to improve upon. Backend is inspired by Scikit-Learn, effectively a distilled version of it. Currently under development with supports for ridge and linear regression.
+# Main Features
 
-### The main page
+#### Simple
+Just throw in your csv file, specify the feature(s) and target, and it'll give it a go.
+
+#### Lightweight 
+With a NumPy-only approach, SuperPlug AutoML defies the belief that Python requires an entourage of dependencies for robust machine learning. The Backend is proprietary and inspired by Scikit-Learn, effectively a distilled version of it. 
+
+#### Flexible Backend and Dependency
+While the main backend is custom-made, the API allows for seamless backend switch to Scikit-Learn if you want more runtime efficiency at the expense of added dependency.
+
+
+## The main page
 ![alt text](main_page.PNG)
 
-### The result page
+## The result page
 ![alt text](result_page.PNG)
 
 ## AutoML pipeline
