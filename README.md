@@ -1,6 +1,7 @@
 # Overview
 
-Enter SuperPlug AutoML – your handy and no-code traditional supervised learning companion, meticulously brought to life by the coding prowess of ChatGPT, Claude, Bard, and me. Positioned as a baseline model comparison tool, this collaboration champions simplicity without compromising efficiency (well at least not that much :p). 
+Introducing SuperPlug AutoML – your intuitive no-code-solution for training traditional supervised algorithm, meticulously brought to life by the coding prowess of ChatGPT, Claude, Bard, and me. Positioned as a baseline model comparison tool, this collaboration champions simplicity without compromising efficiency (well at least not that much :p). 
+
 *Currently under development with supports for ridge and linear regression.*
 
 # Main Features
@@ -9,22 +10,21 @@ Enter SuperPlug AutoML – your handy and no-code traditional supervised learnin
 Just throw in your csv file, specify the feature(s) and target, and it'll give it a go.
 
 #### Lightweight 
-With a NumPy-only approach, SuperPlug AutoML defies the belief that Python requires an entourage of dependencies for robust machine learning. The Backend is proprietary and inspired by Scikit-Learn, effectively a distilled version of it. 
+With a NumPy-only approach, SuperPlug AutoML defies the belief that Python requires an entourage of dependencies for robust machine learning. The backend is proprietary and inspired by Scikit-Learn, effectively a distilled version of it. 
 
 #### Flexible Backend and Dependency
-While the main backend is custom-made, the API allows for seamless backend switch to Scikit-Learn if you want more runtime efficiency at the expense of added dependency.
+While the main backend is custom-made, the API allows for seamless backend switch to Scikit-Learn (just uncomment the imports in api.py) if you want more runtime efficiency at the expense of additional dependency.
 
-
-## The main page
+# The main page
 ![alt text](main_page.PNG)
 
-## The result page
+# The result page
 ![alt text](result_page.PNG)
 
-## AutoML pipeline
+# AutoML pipeline
 SuperPlug seeks to abstract away many of the model creation pipeline. Here lies the breakdown of what it does under the hood.
 
-### The preprocessing pipeline for each column features
+#### The preprocessing pipeline for each column features
 ```mermaid
   graph LR;
       A(Columns)  --> B{Is categorical?}
@@ -34,7 +34,7 @@ SuperPlug seeks to abstract away many of the model creation pipeline. Here lies 
       D --> F[Z-score standardization]
 ```
 
- ### The training pipeline for each models
+ #### The training pipeline for each models
  ```mermaid
  graph LR;
    A(Models) --> X{Is classification?}
@@ -47,7 +47,7 @@ SuperPlug seeks to abstract away many of the model creation pipeline. Here lies 
    E --> C
 ```
 
-### TODO (in order of importance)
+# TODO (in order of importance)
 - Refactor the ResultWindow class (currently quite hideous)
   - Refactor how all_data is getting passed (currently quite chaotic)
   - Just refactor in general (polishing)
