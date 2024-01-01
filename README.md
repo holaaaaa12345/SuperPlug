@@ -7,10 +7,10 @@ Introducing SuperPlug AutoML – your intuitive no-code-solution for training tr
 # Main Features
 
 #### Simple
-Just throw in your csv file, specify the feature(s) and target, and it'll give it a go.
+Just throw in your CSV file and specify the feature(s) and target. It'll train multiple models, tune the hyperparameters (if any), and present the evaluation metrics. 
 
 #### Lightweight 
-With a NumPy-only approach, SuperPlug AutoML defies the belief that Python requires an entourage of dependencies for robust machine learning. The backend is proprietary and inspired by Scikit-Learn, effectively a distilled version of it. 
+With a NumPy-only approach, SuperPlug AutoML defies the belief that Python requires an entourage of dependencies for a robust application. The backend is proprietary and inspired by Scikit-Learn, effectively a distilled version of it. 
 
 #### Flexible Backend and Dependency
 While the main backend is custom-made, the API allows for seamless backend switch to Scikit-Learn (just uncomment the imports in api.py) if you want more runtime efficiency at the expense of additional dependency.
