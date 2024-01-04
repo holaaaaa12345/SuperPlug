@@ -2,23 +2,18 @@
    generates model objects, already equipped with the train and test data,
    that can then be fit by the client."""
 
-from backend import *
 import numpy as np
 
 """This API allows for seamless backend switching between custom (from scratch) 
-   and Scikit-Learn. To use Scikit-Learn uncomment the following imports"""
+   and Scikit-Learn. To use Scikit-Learn, set the following variable to True"""
 
-# from sklearn.preprocessing import StandardScaler, OneHotEncoder
-# from sklearn.model_selection import train_test_split
-# from sklearn.linear_model import Lasso, Ridge, LinearRegression
-# from sklearn.neighbors import KNeighborsRegressor
-# from sklearn.impute import SimpleImputer
-# from sklearn.ensemble import RandomForestRegressor
-# from sklearn.base import BaseEstimator, TransformerMixin
-# from sklearn.tree import DecisionTreeRegressor
-# from sklearn.pipeline import Pipeline
-# from sklearn.model_selection import RandomizedSearchCV
-# from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+USE_SKLEARN = False
+
+if USE_SKLEARN:
+	from sklearn_backend import *
+
+else:
+	from custom_backend import *
 	
 
 class FinalAlgo():
