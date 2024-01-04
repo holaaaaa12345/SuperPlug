@@ -2,7 +2,7 @@
 
 Introducing SuperPlug AutoML – your intuitive no-code-solution for training traditional supervised algorithm, meticulously brought to life by the coding prowess of ChatGPT, Claude, Bard, and me. Positioned as a baseline model comparison tool, this collaboration champions simplicity without compromising efficiency (well at least not that much :p). 
 
-*Currently under development with supports for ridge and linear regression.*
+*Currently under development with supports for Ridge, Linear, and brute-forced KNN regression.*
 
 # Main Features
 
