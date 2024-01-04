@@ -11,6 +11,7 @@ import numpy as np
 # from sklearn.preprocessing import StandardScaler, OneHotEncoder
 # from sklearn.model_selection import train_test_split
 # from sklearn.linear_model import Lasso, Ridge, LinearRegression
+# from sklearn.neighbors import KNeighborsRegressor
 # from sklearn.impute import SimpleImputer
 # from sklearn.ensemble import RandomForestRegressor
 # from sklearn.base import BaseEstimator, TransformerMixin
@@ -31,8 +32,8 @@ class FinalAlgo():
 
 		if hasattr(self.estimator_, "_param_space"):
 			cv_search = RandomizedSearchCV(estimator=self.estimator_, 
-							 param_distributions=self.estimator_._param_space,
-							 n_iter=10)
+							 			   param_distributions=self.estimator_._param_space,
+							 			   n_iter=10)
 			cv_search.fit(self._all_data["X_train"], self._all_data["y_train"])
 			estimator_final = cv_search.best_estimator_
 			# print(estimator_final.alpha)
@@ -98,6 +99,13 @@ class Ridge(Ridge, CustomRegression):
 # 		super().__init__(max_depth=max_depth, **kwargs)
 # 		self.all_data = None
 # 		self.param_space = {"max_depth": np.arange(1, 31)}
+
+class KNeighborsRegressor(KNeighborsRegressor, CustomRegression):
+
+	def __init__(self, n_neighbors=5, **kwargs):
+		super().__init__(n_neighbors=n_neighbors, **kwargs)
+		self._all_data = None
+		self._param_space = {"n_neighbors": np.arange(2, 13)}
 
 
 class StructuredArrImputer(BaseEstimator, TransformerMixin):
@@ -241,8 +249,10 @@ class Result:
 
 	def get_models(self):
 		models = {"Linear Regression": LinearRegression(), 
-			      "Ridge Regression": Ridge()}
+			      "Ridge Regression": Ridge(),
+			      "KNN Regression": KNeighborsRegressor()}
 
+		# Wrap all the models in FinalAlgo class
 		fittables = {i:FinalAlgo(j, self.all_data) for (i,j) in models.items()}
 		return fittables
 

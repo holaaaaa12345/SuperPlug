@@ -1,5 +1,6 @@
 import numpy as np
 from metrics import *
+from abc import ABC, abstractmethod
 
 """This is my custom and purely python backend for the SuperPlug. 
 The OOP structure resembles that of Sklearn. In fact, I try to 
@@ -664,3 +665,75 @@ class Ridge(LinearModel, BaseRegression):
         return prediction
 
 
+class KNNBase(ABC, BaseRegression):
+    """
+    K-Nearest Neighbors (KNN) base class for regression and classification.
+
+    Parameters:
+    - n_neighbors (int): Number of neighbors to consider during prediction.
+
+    Methods:
+    - fit(X, y): Fit the KNN model with training data.
+    - predict(X): Predict target values for new data points.
+
+    Abstract Method:
+    - prediction_measure(nearest_targets): Define the prediction measure.
+
+    Attributes:
+    - n_neighbors (int): Number of neighbors.
+    - X_ref_ (numpy.ndarray): Training data features.
+    - y_ref_ (numpy.ndarray): Training data labels.
+    """
+
+    def __init__(self, n_neighbors=5):
+        """Initialize KNN with the specified number of neighbors."""
+        self.n_neighbors = n_neighbors
+
+    def fit(self, X, y):
+        """Fit the KNN model with training data."""
+        self.X_ref_ = X
+        self.y_ref_ = y
+        return self
+
+    def predict(self, X):
+        """Predict target values for new data points."""
+        distances = np.linalg.norm(X[:, np.newaxis] - self.X_ref_, axis=2)
+        nearest_indices = np.argsort(distances)[:, :self.n_neighbors]
+        nearest_targets = self.y_ref_[nearest_indices]
+        predictions = np.apply_along_axis(self.prediction_measure, axis=1, arr=nearest_targets)
+        return predictions
+
+    @staticmethod
+    def euclidean_distance(x1, x2):
+        """Compute the Euclidean distance between two vectors."""
+        return np.linalg.norm(x1 - x2)
+
+    @abstractmethod
+    def prediction_measure(self, nearest_targets):
+        """Abstract method to define the prediction measure."""
+
+
+class KNeighborsRegressor(KNNBase):
+    """
+    KNN regressor for predicting continuous values.
+
+    Method:
+    - prediction_measure(nearest_targets): Calculate the mean of nearest targets.
+    """
+
+    def prediction_measure(self, nearest_targets):
+        """Calculate the mean of nearest targets for regression."""
+        return np.mean(nearest_targets)
+
+
+class KNNClassifier(KNNBase):
+    """
+    KNN classifier for predicting discrete values.
+
+    Method:
+    - prediction_measure(nearest_targets): Predict the mode of nearest targets.
+    """
+
+    def prediction_measure(self, nearest_targets):
+        """Predict the mode of nearest targets for classification."""
+        return int(np.argmax(np.bincount(nearest_targets)))
