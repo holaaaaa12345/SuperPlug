@@ -1,6 +1,6 @@
 # Overview
 
-Introducing SuperPlug AutoML – your intuitive no-code-solution for training traditional supervised algorithm, meticulously brought to life by the coding prowess of ChatGPT, Claude, Bard, and me. Positioned as a baseline model comparison tool, this collaboration champions simplicity without compromising efficiency (well at least not that much :p). 
+Introducing SuperPlug AutoML – your intuitive no-code-solution for training traditional supervised algorithm, meticulously brought to life by the coding prowess of ChatGPT, Claude, Bard, and me. It's intended for creating and choosing baseline model to be improved upon manually -- if you cant beat it's performance, you simply suck :stuck_out_tongue_closed_eyes:. 
 
 *Currently under development with supports for Ridge, Linear, and brute-forced KNN regression.*
 
@@ -50,7 +50,7 @@ SuperPlug seeks to abstract away many of the model creation pipeline. Here lies 
 # TODO (in order of importance)
 - Refactor the ResultWindow class (currently quite hideous)
   - Refactor how all_data is getting passed (currently quite chaotic)
-  - Just refactor in general (polishing)
+  - Just refactor the api.py in general
 - Finish the docs and comments
 - Add more algorithms for regression
 - Finish the readme

@@ -201,7 +201,16 @@ class Scaler(BaseEstimator, TransformerMixin):
 		# print(f"final: {X}")
 		return X
 
+
+
 class Result:
+	""" 
+	The only class that will be called in the frontend. All the calculation will 
+	be called from the frontend through this class. 
+
+	TODO: Perhaps this is not the best idea haha, think of a better one.
+
+	"""
 
 	def __init__(self, feature, target, model_type, PCA=False, save=False):
 
