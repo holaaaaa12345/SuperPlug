@@ -16,7 +16,7 @@ else:
 	from custom_backend import *
 	
 
-class FinalAlgo():
+class PreprocessModel():
 	
 	def __init__(self, estimator, all_data, **kwargs):
 
@@ -202,35 +202,16 @@ class Scaler(BaseEstimator, TransformerMixin):
 		return X
 
 
-
-class Result:
+class PreprocessData:
 	""" 
-	The only class that will be called in the frontend. All the calculation will 
-	be called from the frontend through this class. 
-
-	TODO: Perhaps this is not the best idea haha, think of a better one.
-
+	Class to clean the data, which includes the conversion from
+	structured array to normal numpy array, imputation, encoding, 
+	and scaling.
 	"""
 
-	def __init__(self, feature, target, model_type, PCA=False, save=False):
-
-		train_idx, test_idx = self.train_test_split_indices(len(target), test_size=0.2)
-
-		
-		X_train = [i[train_idx] for i in feature]
-		y_train = target[train_idx]
-		X_test = [i[test_idx] for i in feature]
-		y_test = target[test_idx]
-
-		pipe = self.transform_features(PCA)
-		pipe.fit(X_train)
-
-		X_train = pipe.transform(X_train)
-		X_test = pipe.transform(X_test)
-
-		self.all_data = {"X_test": X_test, "y_train":y_train, 
-						 "X_train":X_train, "y_test":y_test}
-
+	def __init__(self, model_type=None, run_pca=False):
+		self.model_type = model_type
+		self.run_pca = run_pca
 
 	def train_test_split_indices(self, total_samples, test_size=0.2, random_seed=None):
 		
@@ -242,21 +223,47 @@ class Result:
 
 		return train_indices, test_indices
 
-	def transform_features(self, PCA):
+	def get_pipeline(self):
 		pipe = [("Parse and impute", StructuredArrImputer()),
 				("One hot encoding", Encoder()),
 				("Feature scaling", Scaler())]
-		if PCA:
+		if self.run_pca:
 			pipe.append(("PCA", PCA()))
 
 		return Pipeline(pipe)
 
-	def get_models(self):
+	def get_final_data(self, feature, target):
+		
+		train_idx, test_idx = self.train_test_split_indices(len(target), test_size=0.2)
+		
+		X_train = [i[train_idx] for i in feature]
+		y_train = target[train_idx]
+		X_test = [i[test_idx] for i in feature]
+		y_test = target[test_idx]
+
+		pipe = self.get_pipeline()
+		pipe.fit(X_train)
+
+		X_train = pipe.transform(X_train)
+		X_test = pipe.transform(X_test)
+
+		all_data = {"X_test": X_test, "y_train":y_train, 
+				    "X_train":X_train, "y_test":y_test}
+
+		return all_data
+
+
+# Stand alone function to get all the models available given the type and all data.
+def get_models(model_type, all_data):
+
+	if model_type=="Regression":
 		models = {"Linear Regression": LinearRegression(), 
 			      "Ridge Regression": Ridge(),
 			      "KNN Regression": KNeighborsRegressor()}
+	else:
+		models = {}
 
-		# Wrap all the models in FinalAlgo class
-		fittables = {i:FinalAlgo(j, self.all_data) for (i,j) in models.items()}
-		return fittables
+	# Wrap all the models in FinalAlgo class
+	fittables = {i:PreprocessModel(j, all_data) for (i,j) in models.items()}
+	return fittables
 
