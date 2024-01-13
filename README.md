@@ -15,13 +15,13 @@ With a NumPy-only approach, SuperPlug AutoML defies the belief that Python requi
 #### Flexible Backend and Dependency
 While the main backend is custom-made, the API allows for seamless backend switch to Scikit-Learn (just uncomment the imports in api.py) if you want more runtime efficiency at the expense of additional dependency.
 
-# The main page
+# The Main Page
 ![alt text](main_page.PNG)
 
-# The result page
+# The Result Page
 ![alt text](result_page.PNG)
 
-# AutoML pipeline
+# AutoML Pipeline
 SuperPlug seeks to abstract away many of the model creation pipeline. Here lies the breakdown of what it does under the hood.
 
 #### The preprocessing pipeline for each column features
@@ -45,6 +45,23 @@ SuperPlug seeks to abstract away many of the model creation pipeline. Here lies 
    B -- no --> C[Fit] --> D[Evaluate]
    B -- yes--> E[Randomized search cv]
    E --> C
+```
+
+# How to Run Locally
+
+#### Clone the repository
+```
+$ git clone https://github.com/holaaaaa12345/SuperPlug.git
+```
+#### Install dependencies. 
+Unless you opt for Scikit-Learn as backend, it only requires Python and NumPy. Most python devs should already have it. If you're an A student, setup a virtual environment first.
+```
+$ cd SuperPlug
+$ pip install -r requirements.txt
+```
+#### Run frontend.py file
+```
+$ python frontend.py
 ```
 
 # TODO (in order of importance)
