@@ -10,6 +10,9 @@ import numpy as np
 from metrics import *
 from abc import ABC, abstractmethod
 
+###############################################################
+# The following classes are parent class (Similar to sklearn) #
+###############################################################
 
 class BaseEstimator:
     """
@@ -65,6 +68,9 @@ class TransformerMixin:
         """
         return self.fit(X, **fit_params).transform(X)
 
+##########################################################
+# The following classes are data preprocessing and tools #
+##########################################################
 
 class KFold:
     """
@@ -509,6 +515,10 @@ class OneHotEncoder(TransformerMixin):
                 column_counter += 1
         
         return X_encoded
+
+#############################################################
+# The following classes are the models written from scratch #
+#############################################################
 
 class BaseRegression(BaseEstimator):
     """

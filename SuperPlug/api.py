@@ -11,9 +11,9 @@ import numpy as np
 """
 This API allows for seamless backend switching between custom (from scratch) 
 and Scikit-Learn. To use Scikit-Learn, set the following variable to True.
+You should use Scikit-Learn for large dataset (>2000 rows) to avoid freezing.
 
 """
-
 USE_SKLEARN = False
 if USE_SKLEARN:
 	from sklearn_backend import *
@@ -22,14 +22,12 @@ else:
 	from custom_backend import *
 
 
-#################################################################
-# The following are model classes to modify the backend classes #
-#################################################################
+#######################################################
+# The following are parent classes to evaluate models #
+#######################################################
 
 class CustomClassification:
-
-	def get_score(self):
-		y_pred_train = self.predict(X_train)
+	pass
 
 class CustomRegression:
 
@@ -47,6 +45,10 @@ class CustomRegression:
 				dict_score[f"{name}_{part}"] = np.round(metric(y_true, y_pred), 4)
 
 		return dict_score
+
+#####################################################################
+# The following are model classes that inherit from backend models #
+#####################################################################
 
 class LinearRegression(LinearRegression, CustomRegression):
 
@@ -67,23 +69,6 @@ class KNeighborsRegressor(KNeighborsRegressor, CustomRegression):
 		super().__init__(n_neighbors=n_neighbors, **kwargs)
 		self._all_data = None
 		self._param_space = {"n_neighbors": np.arange(2, 13)}
-
-# Backend not ready yet :(
-
-# class Lasso(Lasso, CustomRegression):
-
-# 	def __init__(self, alpha=1, **kwargs):
-# 		super().__init__(alpha, **kwargs)
-# 		self.all_data = None
-# 		self.param_space = {"alpha": np.linspace(0.001, 1, 100)}
-
-# class DecisionTreeRegressor(DecisionTreeRegressor, CustomRegression):
-
-# 	def __init__(self, max_depth=0, **kwargs):
-# 		super().__init__(max_depth=max_depth, **kwargs)
-# 		self.all_data = None
-# 		self.param_space = {"max_depth": np.arange(1, 31)}
-
 
 ##########################################################
 # The following are classes to preprocess and clean data #

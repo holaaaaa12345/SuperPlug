@@ -22,7 +22,10 @@ COLOR_LISTBOX = "#254a3a"
 
 
 class FeatureConfig(tk.Frame):
-
+    """
+    Frame class for taking input csv, validating it, and specifiying features 
+    and target.
+    """
     def __init__(self, parent, *args, **kwargs):
 
         tk.Frame.__init__(self, parent, *args, **kwargs)
@@ -89,6 +92,9 @@ class FeatureConfig(tk.Frame):
 
 
     def browse_file(self):
+        """
+        Method to browse input csv. It calls get_csv function.
+        """
         file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
         self.entry_path.delete(0, tk.END)
         self.entry_path.insert(0, file_path)
@@ -97,35 +103,34 @@ class FeatureConfig(tk.Frame):
     def get_csv(self, file_path):
 
         if file_path:
-            file_name = file_path.split("/")[-1]
+            self.file_name = file_path.split("/")[-1]
             with open(file_path, "r") as file:
                 reader = csv.reader(file)
-                self.load_validate_csv(reader, file)
-            self.show_columns(self.header)
-            self.parent.manager.enable_all()
-            self.parent.terminal.write(f"======| {file_name} uploaded successfully |======")
-        #     except FileNotFoundError:
-        #         print(f"CSV file not found: {file_path}")
-        #     except ValueError as e:
-        #         self.parent.terminal.write(e)
-        #     # except Exception as e:
-        #     #     self.parent.terminal.write(f"Unknown error: {file_name}")
-        # else:
-        #     self.parent.terminal.write("No CSV chosen.")
+                self.load_validate_csv(reader)
 
-    def load_validate_csv(self, reader, data):
+        else:
+            self.parent.terminal.write("No CSV chosen.")
+
+    def load_validate_csv(self, reader):
+
         try:
             # Load the CSV file using np.genfromtxt
             self.header = ["_".join(i.split()) for i in next(reader)]
-            self.raw_data = np.genfromtxt(data, dtype=None, delimiter=",", 
+            inter = ("\t".join(i) for i in reader)  # trick to handle comma within a string
+            self.raw_data = np.genfromtxt(inter, dtype=None, delimiter="\t", 
                                           names=self.header, encoding=None)
 
-        # TODO: How to do the validation? -__-
+        # TODO: How to make the validation more specific? -__-
         except Exception as e:
-            print(f"Error: {e}")
-            return None
+            self.parent.terminal.write(f"input error: {e}")
+
+        else:
+            self.show_columns(self.header)
+            self.parent.manager.enable_all()
+            self.parent.terminal.write(f"======| {self.file_name} uploaded successfully |======")
 
     def show_columns(self, columns):
+
         # Clear existing listboxes
         self.columns.delete(0, tk.END)
         self.features.delete(0, tk.END)
@@ -136,6 +141,10 @@ class FeatureConfig(tk.Frame):
             self.columns.insert(tk.END, col_name)
 
     def move_selected(self, direction):
+        """
+        Method that allows column names to be passed back and forth
+        between feature and target.
+        """
 
         if direction == "target":
             selected_items = self.columns.curselection()
@@ -250,8 +259,10 @@ class ModelType(ttk.LabelFrame):
         self.radio_mod_type_2.grid(padx=10, sticky="NW")
 
 class ResultWindow(tk.Toplevel):
-    """The class in which the computation will happen and 
-       the result will be shown"""
+    """
+    The class in which the computation will happen and 
+    the result will be shown
+    """
 
     def __init__(self, parent, feature, target, model_type, **kwargs):
         self.parent = parent
