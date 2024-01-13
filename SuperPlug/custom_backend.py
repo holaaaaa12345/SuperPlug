@@ -1,11 +1,15 @@
+"""
+This is my custom and purely python backend for the SuperPlug. 
+The OOP structure resembles that of Sklearn. In fact, I try to 
+mimick Sklearn but without all the fancy code and exception handling.
+Most comments and docs are written by chatgpt.
+"""
+
+
 import numpy as np
 from metrics import *
 from abc import ABC, abstractmethod
 
-"""This is my custom and purely python backend for the SuperPlug. 
-The OOP structure resembles that of Sklearn. In fact, I try to 
-mimick Sklearn but without all the fancy code and exception handling.
-Most comments and docs are written by chatgpt"""
 
 class BaseEstimator:
     """

@@ -1,45 +1,30 @@
-"""API to connect to either custom backend or to sklearn. This API
-   generates model objects, already equipped with the train and test data,
-   that can then be fit by the client."""
-
+"""
+API to connect to either custom backend or to sklearn. This API
+consists of:
+   1) Custom implementation of model classes by inheriting from the backend.
+   2) FinalModel class to wrap the model classes s.t. they are ready
+      to be fitted.
+   3) PreprocessData class to clean and convert data.
+"""
 import numpy as np
 
-"""This API allows for seamless backend switching between custom (from scratch) 
-   and Scikit-Learn. To use Scikit-Learn, set the following variable to True"""
+"""
+This API allows for seamless backend switching between custom (from scratch) 
+and Scikit-Learn. To use Scikit-Learn, set the following variable to True.
+
+"""
 
 USE_SKLEARN = False
-
 if USE_SKLEARN:
 	from sklearn_backend import *
 
 else:
 	from custom_backend import *
-	
 
-class PreprocessModel():
-	
-	def __init__(self, estimator, all_data, **kwargs):
 
-		self._all_data = all_data
-		self.estimator_ = estimator
-
-	def fit(self):
-
-		if hasattr(self.estimator_, "_param_space"):
-			cv_search = RandomizedSearchCV(estimator=self.estimator_, 
-							 			   param_distributions=self.estimator_._param_space,
-							 			   n_iter=10)
-			cv_search.fit(self._all_data["X_train"], self._all_data["y_train"])
-			estimator_final = cv_search.best_estimator_
-			# print(estimator_final.alpha)
-
-		else:
-			estimator_final = self.estimator_.fit(self._all_data["X_train"], self._all_data["y_train"])
-
-		# TODO: Surely there's a better way to do this -__-
-		setattr(estimator_final, "_all_data", self._all_data)
-		return estimator_final
-
+#################################################################
+# The following are model classes to modify the backend classes #
+#################################################################
 
 class CustomClassification:
 
@@ -63,8 +48,6 @@ class CustomRegression:
 
 		return dict_score
 
-
-
 class LinearRegression(LinearRegression, CustomRegression):
 
 	def __init__(self, **kwargs):
@@ -78,6 +61,12 @@ class Ridge(Ridge, CustomRegression):
 		self._all_data = None
 		self._param_space = {"alpha": np.linspace(0.0001, 1, 100)}
 
+class KNeighborsRegressor(KNeighborsRegressor, CustomRegression):
+
+	def __init__(self, n_neighbors=5, **kwargs):
+		super().__init__(n_neighbors=n_neighbors, **kwargs)
+		self._all_data = None
+		self._param_space = {"n_neighbors": np.arange(2, 13)}
 
 # Backend not ready yet :(
 
@@ -95,23 +84,16 @@ class Ridge(Ridge, CustomRegression):
 # 		self.all_data = None
 # 		self.param_space = {"max_depth": np.arange(1, 31)}
 
-class KNeighborsRegressor(KNeighborsRegressor, CustomRegression):
 
-	def __init__(self, n_neighbors=5, **kwargs):
-		super().__init__(n_neighbors=n_neighbors, **kwargs)
-		self._all_data = None
-		self._param_space = {"n_neighbors": np.arange(2, 13)}
-
+##########################################################
+# The following are classes to preprocess and clean data #
+##########################################################
 
 class StructuredArrImputer(BaseEstimator, TransformerMixin):
     
     def __init__(self):
     	self.imputer_num = SimpleImputer(strategy="mean")
     	self.imputer_cat = SimpleImputer(strategy="most_frequent", missing_values="")
-    	# self.one_hot_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore', 
-    	# 									 drop="first")
-    	# self.standard_scaler = StandardScaler()
-
         
     def classify_arrays(self, arrays):
 
@@ -202,10 +184,41 @@ class Scaler(BaseEstimator, TransformerMixin):
 		return X
 
 
+#####################################################################
+# The following class and function will be called from the frontend #
+#####################################################################
+
+class FinalModel():
+	"""
+	Preprocessing class to wrap models to incorporate hyperparametric tuning
+	(randomizedsearchCV). It can then be fitted like a normal model.
+	"""
+	def __init__(self, estimator, all_data, **kwargs):
+
+		self._all_data = all_data
+		self.estimator_ = estimator
+
+	def fit(self):
+
+		if hasattr(self.estimator_, "_param_space"):
+			cv_search = RandomizedSearchCV(estimator=self.estimator_, 
+							 			   param_distributions=self.estimator_._param_space,
+							 			   n_iter=10)
+			cv_search.fit(self._all_data["X_train"], self._all_data["y_train"])
+			estimator_final = cv_search.best_estimator_
+			# print(estimator_final.alpha)
+
+		else:
+			estimator_final = self.estimator_.fit(self._all_data["X_train"], self._all_data["y_train"])
+
+		# TODO: Surely there's a better way to do this -__-
+		setattr(estimator_final, "_all_data", self._all_data)
+		return estimator_final
+
 class PreprocessData:
 	""" 
-	Class to clean the data, which includes the conversion from
-	structured array to normal numpy array, imputation, encoding, 
+	Class to preprocess the data, which includes the train-test-split,
+	conversion from structured array to normal numpy array, imputation, encoding, 
 	and scaling.
 	"""
 
@@ -224,6 +237,7 @@ class PreprocessData:
 		return train_indices, test_indices
 
 	def get_pipeline(self):
+
 		pipe = [("Parse and impute", StructuredArrImputer()),
 				("One hot encoding", Encoder()),
 				("Feature scaling", Scaler())]
@@ -233,7 +247,10 @@ class PreprocessData:
 		return Pipeline(pipe)
 
 	def get_final_data(self, feature, target):
-		
+		"""
+		Method to return the all data, which includes train and test
+		data, in form of a dictionary.
+		"""
 		train_idx, test_idx = self.train_test_split_indices(len(target), test_size=0.2)
 		
 		X_train = [i[train_idx] for i in feature]
@@ -263,7 +280,7 @@ def get_models(model_type, all_data):
 	else:
 		models = {}
 
-	# Wrap all the models in FinalAlgo class
-	fittables = {i:PreprocessModel(j, all_data) for (i,j) in models.items()}
+	# Wrap all the models in PreprocessModel class
+	fittables = {i:FinalModel(j, all_data) for (i,j) in models.items()}
 	return fittables
 

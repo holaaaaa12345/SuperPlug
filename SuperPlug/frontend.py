@@ -1,10 +1,12 @@
-"""The tkinter frontend part"""
+"""
+The Tkinter frontend part. The codes are structure in OOP format s.t.
+every major portion of the window will have its own class.
+"""
 
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import numpy as np
 import csv
-import time
 
 from custom_widget import *
 from api import PreprocessData, get_models
