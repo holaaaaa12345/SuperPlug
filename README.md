@@ -68,12 +68,14 @@ $ python frontend.py
 - Finish the docs and comments in every class and function
 - Refactor the usage of "self" in the frontend
   - Some variables do not need to be an attribute
+- Figure out how to properly validate the csv input
 - Add more algorithms for regression
 - Finalize the readme
 - Add support for classification and its algorithms
   - Figure out what needs to change to do so
   - Add appropriate metrics and introduce flexibility for evaluation and scoring
   - Modify the train test split to support stratification
+- Write a more efficient KNN
 - Add support for PCA
 - Make the result window more informative
   - Figure out what other options to add
