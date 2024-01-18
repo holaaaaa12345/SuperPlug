@@ -196,7 +196,8 @@ class FinalModel():
 		else:
 			estimator_final = self.estimator_.fit(self._all_data["X_train"], self._all_data["y_train"])
 
-		# TODO: Surely there's a better way to do this -__-
+		# TODO: Surely there's a better way to send _all_data
+		# all the way to the evaluate method -__-
 		setattr(estimator_final, "_all_data", self._all_data)
 		return estimator_final
 

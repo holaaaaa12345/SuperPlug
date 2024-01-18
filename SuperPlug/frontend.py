@@ -121,8 +121,10 @@ class FeatureConfig(tk.Frame):
                                           names=self.header, encoding=None)
 
         # TODO: How to make the validation more specific? -__-
+        except ValueError as e:
+            self.parent.terminal.write(f"input error: Inconsistent number of columns")
         except Exception as e:
-            self.parent.terminal.write(f"input error: {e}")
+            self.parent.terminal.write(f"input error: Unknown error with your csv")
 
         else:
             self.show_columns(self.header)
@@ -327,8 +329,8 @@ class ResultWindow(tk.Toplevel):
             tree.insert('', 'end', values=values)
 
         # Description about the chosen features, targets, and options
-        feature_txt = f"feature: {self.parent.model_config.feature_content}"
-        target_txt = f"target: {self.parent.model_config.target_content}"
+        feature_txt = f"feature: [{', '.join(self.parent.model_config.feature_content)}]"
+        target_txt = f"target: [{', '.join(self.parent.model_config.target_content)}]"
         pca_txt = f"run_pca: false"
         config_text = tk.Text(self, width=50, height=3)
         config_text.insert(tk.INSERT, feature_txt + "\n")
